@@ -9,7 +9,6 @@ import { receiptHtml, groupByKind } from './receipt.js';
 
 const PAYEE_NAME = 'Ioannis Serafeim';
 const MANUAL_KINDS = { reimbursement: 'Reimbursement', bonus: 'Bonus', adjustment: 'Adjustment' };
-const view = { loading: true, error: '', unpaid: [], payouts: [], cutoff: lastDayOfPrevMonth(), open: new Set() };
 
 const money = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const sum = (items) => Math.round(items.reduce((s, i) => s + Number(i.amount), 0) * 100) / 100;
@@ -18,6 +17,7 @@ function lastDayOfPrevMonth() {
   const [y, m] = todayIso().split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, 0)).toISOString().slice(0, 10);
 }
+const view = { loading: true, error: '', unpaid: [], payouts: [], cutoff: lastDayOfPrevMonth(), open: new Set() };
 const periodLabel = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const due = () => view.unpaid.filter((i) => i.earned_on <= view.cutoff);
 const later = () => view.unpaid.filter((i) => i.earned_on > view.cutoff);
