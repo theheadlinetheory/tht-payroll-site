@@ -1,6 +1,6 @@
 // Data access for the payroll ledger. Every amount comes from ledger_items;
 // the browser never computes pay and never reads the CRM.
-import { sbPayroll } from './supabase.js';
+import { sbPayroll } from './supabase.js?v=1a289eb';
 
 export const PAYEE = 'Ioannis';
 const ITEM_COLS = 'id,position,kind,source_id,description,amount,orig_amount,orig_currency,fx_rate,receipt_path,earned_on,payout_id,reverses_item_id,created_by,created_at';
