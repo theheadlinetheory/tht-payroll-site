@@ -3,8 +3,8 @@
 // The allowlist is the whole point of this app's existence: compensation must
 // not be visible to contractors who have access to the CRM. A session that is
 // not on the list is signed out immediately and never reaches payroll markup.
-import { sbPayroll } from './supabase.js?v=b0605f2';
-import { ALLOWED_EMAILS, ALLOWED_DOMAIN } from './config.js?v=b0605f2';
+import { sbPayroll } from './supabase.js?v=9f96931';
+import { ALLOWED_EMAILS, ALLOWED_DOMAIN } from './config.js?v=9f96931';
 
 let _email = '';
 
