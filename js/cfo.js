@@ -7,13 +7,13 @@
 //   one tab instead of three (Aidan, 2026-09-29: essential numbers only,
 //   limited noise; add more later).
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=3e553a4';
-import { state } from './cfo-shell.js?v=3e553a4';
-import { render } from './cfo-shell.js?v=3e553a4';
-import { esc } from './utils.js?v=3e553a4';
-import { renderCacTab } from './cac.js?v=3e553a4';
-import { renderMarginsTab } from './margins.js?v=3e553a4';
-import { renderOverheadTab } from './overhead.js?v=3e553a4';
+import { sbPayroll as supabase } from './supabase.js?v=b0605f2';
+import { state } from './cfo-shell.js?v=b0605f2';
+import { render } from './cfo-shell.js?v=b0605f2';
+import { esc } from './utils.js?v=b0605f2';
+import { renderCacTab } from './cac.js?v=b0605f2';
+import { renderMarginsTab } from './margins.js?v=b0605f2';
+import { renderOverheadTab } from './overhead.js?v=b0605f2';
 
 const FN_URL = 'https://zrmobsgcfcloufajemxj.supabase.co/functions/v1/cfo-report';
 

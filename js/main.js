@@ -1,8 +1,8 @@
-import { initAuth, currentEmail, signOut } from './auth.js?v=3e553a4';
-import { refreshLedger } from './ledger-view.js?v=3e553a4';
-import { renderCfoTab } from './cfo.js?v=3e553a4';
-import { state, setPainter } from './cfo-shell.js?v=3e553a4';
-import { esc } from './utils.js?v=3e553a4';
+import { initAuth, currentEmail, signOut } from './auth.js?v=b0605f2';
+import { refreshLedger } from './ledger-view.js?v=b0605f2';
+import { renderCfoTab } from './cfo.js?v=b0605f2';
+import { state, setPainter } from './cfo-shell.js?v=b0605f2';
+import { esc } from './utils.js?v=b0605f2';
 
 // Pages. `#payroll` (default) is the ledger; `#cfo` is the CFO Hub, with the
 // CRM's deep-links kept: #cfo/cac, #cfo/margins, #cfo/overhead.
@@ -31,16 +31,23 @@ function paintNav() {
   document.getElementById('signout-btn').onclick = signOut;
 }
 
+// Each page owns its own container. The ledger paints straight into #app,
+// including a late repaint when its CRM sync finishes — if that landed on a
+// shared element it would overwrite the CFO Hub you had already switched to.
+// The CFO Hub paints into #cfo-app; switching pages only toggles which one is
+// visible, so a late ledger repaint lands harmlessly in the hidden #app.
 function paintCfo() {
-  document.getElementById('app').innerHTML = renderCfoTab();
+  document.getElementById('cfo-app').innerHTML = renderCfoTab();
 }
 
 let lastPage = null;
 function show() {
   const page = route();
   paintNav();
+  document.getElementById('app').style.display = page === 'cfo' ? 'none' : '';
+  document.getElementById('cfo-app').style.display = page === 'cfo' ? '' : 'none';
   if (page === 'cfo') { setPainter(paintCfo); paintCfo(); }
-  else if (page !== lastPage) { setPainter(() => {}); refreshLedger(); }
+  else if (page !== lastPage) refreshLedger();
   lastPage = page;
 }
 
