@@ -7,11 +7,11 @@
 // quietly doubles is visible the month it happens. * = computed/estimated,
 // no star = vendor-billed actual.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=c5d18ea';
-import { state } from './cfo-shell.js?v=c5d18ea';
-import { render } from './cfo-shell.js?v=c5d18ea';
-import { esc } from './utils.js?v=c5d18ea';
-import { stackedColumns, SERIES, INK } from './charts.js?v=c5d18ea';
+import { sbPayroll as supabase } from './supabase.js?v=ae42c07';
+import { state } from './cfo-shell.js?v=ae42c07';
+import { render } from './cfo-shell.js?v=ae42c07';
+import { esc } from './utils.js?v=ae42c07';
+import { stackedColumns, SERIES, INK } from './charts.js?v=ae42c07';
 
 const FN_URL = 'https://zrmobsgcfcloufajemxj.supabase.co/functions/v1/overhead-report';
 

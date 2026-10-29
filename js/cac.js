@@ -12,11 +12,11 @@
 //   payouts (selling labor); signed = clients created that month (any
 //   status); CAC = spend ÷ signed, shown as an em-dash when 0 signed.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=c5d18ea';
-import { state } from './cfo-shell.js?v=c5d18ea';
-import { render } from './cfo-shell.js?v=c5d18ea';
-import { esc } from './utils.js?v=c5d18ea';
-import { lineChart, SERIES } from './charts.js?v=c5d18ea';
+import { sbPayroll as supabase } from './supabase.js?v=ae42c07';
+import { state } from './cfo-shell.js?v=ae42c07';
+import { render } from './cfo-shell.js?v=ae42c07';
+import { esc } from './utils.js?v=ae42c07';
+import { lineChart, SERIES } from './charts.js?v=ae42c07';
 
 // Fulfillment-dashboard Supabase project (verify_jwt=false; same
 // session-token contract as weekly-update-send — see js/weekly-updates.js).
@@ -200,7 +200,7 @@ export function renderCacTab(){
     const td2 = 'padding:8px 10px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid #f3f4f6';
     html += `<div style="display:flex;align-items:baseline;gap:10px;margin:18px 0 8px">
       <div style="font-size:13px;font-weight:700">Cost per lead by channel</div>
-      <div style="font-size:11px;color:var(--text-muted)">lead = positive reply (CRM funnel ledger)</div>
+      <div style="font-size:11px;color:var(--text-muted)">lead = positive (funnel ledger; dispositioned not-real cards excluded, desk-DQs count)</div>
     </div>`;
     html += `<div style="overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px">
       <table style="width:100%;border-collapse:collapse;font-size:12px">
