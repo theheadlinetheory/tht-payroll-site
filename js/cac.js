@@ -12,11 +12,11 @@
 //   payouts (selling labor); signed = clients created that month (any
 //   status); CAC = spend ÷ signed, shown as an em-dash when 0 signed.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=2c82378';
-import { state } from './cfo-shell.js?v=2c82378';
-import { render } from './cfo-shell.js?v=2c82378';
-import { esc } from './utils.js?v=2c82378';
-import { lineChart, SERIES } from './charts.js?v=2c82378';
+import { sbPayroll as supabase } from './supabase.js?v=20243a3';
+import { state } from './cfo-shell.js?v=20243a3';
+import { render } from './cfo-shell.js?v=20243a3';
+import { esc } from './utils.js?v=20243a3';
+import { lineChart, SERIES } from './charts.js?v=20243a3';
 
 // Fulfillment-dashboard Supabase project (verify_jwt=false; same
 // session-token contract as weekly-update-send — see js/weekly-updates.js).
@@ -206,10 +206,8 @@ export function renderCacTab(){
     html += `<div style="overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px">
       <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="background:#f9fafb;border-bottom:2px solid var(--border)">
-        <th style="${th2};text-align:left">Month</th>
         <th style="${th2};text-align:left">Channel</th>
         <th style="${th2}">Spend</th>
-        <th style="${th2}">Positives</th>
         <th style="${th2}">Qualified</th>
         <th style="${th2}">$ / qualified</th>
         <th style="${th2}">Closed</th>
@@ -217,14 +215,13 @@ export function renderCacTab(){
       </tr></thead><tbody>`;
     for(const m of cpl){
       const label = m.month.slice(0,4)+'-'+m.month.slice(5);
-      CH.forEach(([key, chLabel], i) => {
+      html += `<tr><td colspan="6" style="padding:6px 10px;background:#f9fafb;border-bottom:1px solid var(--border);font-weight:700;font-size:11px">${esc(label)}${m.partial?' <span title="partial month — channel stamping began Oct 8" style="color:var(--text-muted);font-weight:400">*</span>':''}</td></tr>`;
+      CH.forEach(([key, chLabel]) => {
         const c = m.channels[key] || {};
         const tip = `$${(c.direct||0).toFixed(2)} direct + $${(c.shared_share||0).toFixed(2)} shared-list third`;
         html += `<tr>
-          <td style="${td2};text-align:left;font-weight:600">${i===0?esc(label)+(m.partial?' <span title="partial month — channel stamping began Oct 8" style="color:var(--text-muted)">*</span>':''):''}</td>
           <td style="${td2};text-align:left">${chLabel}</td>
           <td style="${td2}" title="${esc(tip)}">$${(c.spend||0).toFixed(2)}</td>
-          <td style="${td2};color:var(--text-muted)">${c.leads||0}</td>
           <td style="${td2}">${c.qualified||0}</td>
           <td style="${td2};font-weight:600">${c.cpql==null?'—':'$'+c.cpql.toFixed(2)}</td>
           <td style="${td2}">${c.won||0}</td>
@@ -236,8 +233,7 @@ export function renderCacTab(){
     html += `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.6">
       Channel spend: inboxes, domains, email verification and Blooio (texts email respondents) → Email;
       Aimfox → LinkedIn; GHL sender share + ClearoutPhone → SMS. Shared list building splits in equal
-      thirds (hover Spend for the split). Positives exclude dispositioned not-real cards; qualified also
-      excludes desk-DQs. Closed counts clients won THAT month by lead channel, so CAC can lag the lead's
+      thirds (hover Spend for the split). Qualified = a positive that survived desk triage (not-real cards and desk-DQs excluded). Closed counts clients won THAT month by lead channel, so CAC can lag the lead's
       month. Selling labor and general tools stay out (they are in loaded CAC above). * = partial month.
     </div>`;
   }

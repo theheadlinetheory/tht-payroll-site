@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { PAYROLL_SUPABASE_URL, PAYROLL_SUPABASE_ANON_KEY } from './config.js?v=2c82378';
+import { PAYROLL_SUPABASE_URL, PAYROLL_SUPABASE_ANON_KEY } from './config.js?v=20243a3';
 
 // Read/write: this app's own payroll database.
 export const sbPayroll = createClient(PAYROLL_SUPABASE_URL, PAYROLL_SUPABASE_ANON_KEY);

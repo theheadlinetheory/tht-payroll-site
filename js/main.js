@@ -1,8 +1,8 @@
-import { initAuth, currentEmail, signOut } from './auth.js?v=2c82378';
-import { refreshLedger } from './ledger-view.js?v=2c82378';
-import { renderCfoTab } from './cfo.js?v=2c82378';
-import { state, setPainter } from './cfo-shell.js?v=2c82378';
-import { esc } from './utils.js?v=2c82378';
+import { initAuth, currentEmail, signOut } from './auth.js?v=20243a3';
+import { refreshLedger } from './ledger-view.js?v=20243a3';
+import { renderCfoTab } from './cfo.js?v=20243a3';
+import { state, setPainter } from './cfo-shell.js?v=20243a3';
+import { esc } from './utils.js?v=20243a3';
 
 // Pages. `#payroll` (default) is the ledger; `#cfo` is the CFO Hub, with the
 // CRM's deep-links kept: #cfo/cac, #cfo/margins, #cfo/overhead.
