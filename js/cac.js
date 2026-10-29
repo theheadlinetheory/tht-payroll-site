@@ -12,11 +12,11 @@
 //   payouts (selling labor); signed = clients created that month (any
 //   status); CAC = spend ÷ signed, shown as an em-dash when 0 signed.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=b1c3d10';
-import { state } from './cfo-shell.js?v=b1c3d10';
-import { render } from './cfo-shell.js?v=b1c3d10';
-import { esc } from './utils.js?v=b1c3d10';
-import { lineChart, SERIES } from './charts.js?v=b1c3d10';
+import { sbPayroll as supabase } from './supabase.js?v=c5d18ea';
+import { state } from './cfo-shell.js?v=c5d18ea';
+import { render } from './cfo-shell.js?v=c5d18ea';
+import { esc } from './utils.js?v=c5d18ea';
+import { lineChart, SERIES } from './charts.js?v=c5d18ea';
 
 // Fulfillment-dashboard Supabase project (verify_jwt=false; same
 // session-token contract as weekly-update-send — see js/weekly-updates.js).
@@ -188,6 +188,46 @@ export function renderCacTab(){
     if(open) html += renderComponentRows(m, 7);
   }
   html += `</tbody></table></div>`;
+
+  // Cost per lead by acquisition channel (Aidan, 2026-10-29). A lead is a
+  // POSITIVE from the CRM's pipeline_leads ledger; channel software books
+  // whole (inboxes/domains/verify = email, Aimfox = LinkedIn, Blooio +
+  // ClearoutPhone = SMS) and shared list-building splits in equal thirds.
+  const cpl = state.cacReport.channel_cpl;
+  if(cpl && cpl.length){
+    const CH = [['email','Email'],['linkedin','LinkedIn'],['sms','SMS']];
+    const th2 = 'padding:8px 10px;text-align:right;font-weight:600;white-space:nowrap';
+    const td2 = 'padding:8px 10px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid #f3f4f6';
+    html += `<div style="display:flex;align-items:baseline;gap:10px;margin:18px 0 8px">
+      <div style="font-size:13px;font-weight:700">Cost per lead by channel</div>
+      <div style="font-size:11px;color:var(--text-muted)">lead = positive reply (CRM funnel ledger)</div>
+    </div>`;
+    html += `<div style="overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f9fafb;border-bottom:2px solid var(--border)">
+        <th style="${th2};text-align:left">Month</th>
+        ${CH.map(([,label])=>`<th style="${th2}">${label} leads</th><th style="${th2}">${label} $/lead</th>`).join('')}
+      </tr></thead><tbody>`;
+    for(const m of cpl){
+      const label = m.month.slice(0,4)+'-'+m.month.slice(5);
+      html += `<tr><td style="${td2};text-align:left;font-weight:600">${esc(label)}${m.partial?' <span title="partial month — channel stamping began Oct 8" style="color:var(--text-muted)">*</span>':''}</td>`;
+      for(const [key] of CH){
+        const c = m.channels[key] || {};
+        const tip = `spend $${(c.spend||0).toFixed(2)} = $${(c.direct||0).toFixed(2)} direct + $${(c.shared_share||0).toFixed(2)} shared-list third`;
+        html += `<td style="${td2}">${c.leads||0}</td>
+          <td style="${td2};font-weight:600" title="${esc(tip)}">${c.cpl==null?'—':'$'+c.cpl.toFixed(2)}</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</tbody></table></div>`;
+    html += `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.6">
+      Channel spend: inboxes, domains and email verification → Email; Aimfox → LinkedIn; Blooio iMessage +
+      ClearoutPhone → SMS. Shared list building (scrapes + enrichment yield email, LinkedIn profile and phone
+      in one pass) splits in equal thirds — hover a $/lead for the split. Selling labor and general
+      acquisition tools stay out of per-channel figures (they belong to no single channel; they remain in
+      loaded CAC above). * = partial month. Leads from cold calls or unknown sources are not shown here.
+    </div>`;
+  }
 
   html += `<div style="font-size:11px;color:var(--text-muted);margin-top:8px;font-style:italic">Monthly figures are noisy: clients often onboard the month after they close. All-time is the reliable number.</div>`;
 

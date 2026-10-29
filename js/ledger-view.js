@@ -1,11 +1,11 @@
 // The payroll screen: what is owed, what was paid, and the extras form.
 // Pay is never typed — the payout total is the sum of the lines it takes.
-import { esc, showToast } from './utils.js?v=b1c3d10';
+import { esc, showToast } from './utils.js?v=c5d18ea';
 import {
   syncFromCrm, loadUnpaid, loadPayouts, loadPayoutItems, recordPayout,
   addManualItem, uploadReceipt, receiptUrl, voidItem,
-} from './ledger-data.js?v=b1c3d10';
-import { receiptHtml, groupByKind } from './receipt.js?v=b1c3d10';
+} from './ledger-data.js?v=c5d18ea';
+import { receiptHtml, groupByKind } from './receipt.js?v=c5d18ea';
 
 const PAYEE_NAME = 'Ioannis Serafeim';
 const MANUAL_KINDS = { reimbursement: 'Reimbursement', bonus: 'Bonus', adjustment: 'Adjustment' };
