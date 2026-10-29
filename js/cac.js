@@ -12,11 +12,11 @@
 //   payouts (selling labor); signed = clients created that month (any
 //   status); CAC = spend ÷ signed, shown as an em-dash when 0 signed.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=7581c06';
-import { state } from './cfo-shell.js?v=7581c06';
-import { render } from './cfo-shell.js?v=7581c06';
-import { esc } from './utils.js?v=7581c06';
-import { lineChart, SERIES } from './charts.js?v=7581c06';
+import { sbPayroll as supabase } from './supabase.js?v=911cc15';
+import { state } from './cfo-shell.js?v=911cc15';
+import { render } from './cfo-shell.js?v=911cc15';
+import { esc } from './utils.js?v=911cc15';
+import { lineChart, SERIES } from './charts.js?v=911cc15';
 
 // Fulfillment-dashboard Supabase project (verify_jwt=false; same
 // session-token contract as weekly-update-send — see js/weekly-updates.js).
@@ -211,7 +211,7 @@ export function renderCacTab(){
         <th style="${th2}">Qualified positives</th>
         <th style="${th2}">$ / qualified positive</th>
         <th style="${th2}">Closed</th>
-        <th style="${th2}">CAC</th>
+        <th style="${th2}">Loaded CAC</th>
       </tr></thead><tbody>`;
     for(const m of cpl){
       const label = m.month.slice(0,4)+'-'+m.month.slice(5);
@@ -225,7 +225,7 @@ export function renderCacTab(){
           <td style="${td2}">${c.qualified||0}</td>
           <td style="${td2};font-weight:600">${c.cpql==null?'—':'$'+c.cpql.toFixed(2)}</td>
           <td style="${td2}">${c.won||0}</td>
-          <td style="${td2};font-weight:600">${c.cac==null?'—':'$'+c.cac.toFixed(2)}</td>
+          <td style="${td2};font-weight:600" title="loaded spend $${(c.loaded_spend||0).toFixed(2)} = channel $${(c.spend||0).toFixed(2)} + share of selling labor/general tools">${c.cac==null?'—':'$'+c.cac.toFixed(2)}</td>
         </tr>`;
       });
     }
@@ -234,7 +234,7 @@ export function renderCacTab(){
       Channel spend: inboxes, domains, email verification and Blooio (texts email respondents) → Email;
       Aimfox → LinkedIn; GHL sender share + ClearoutPhone → SMS. Shared list building splits in equal
       thirds (hover Spend for the split). Qualified = a positive that survived desk triage (not-real cards and desk-DQs excluded). Closed counts clients won THAT month by lead channel, so CAC can lag the lead's
-      month. Selling labor and general tools stay out (they are in loaded CAC above). * = partial month.
+      month. CAC is LOADED: selling labor and general tools allocate to channels by qualified-lead share (hover a CAC for the figure). * = partial month.
     </div>`;
   }
 
