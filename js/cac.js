@@ -12,11 +12,11 @@
 //   payouts (selling labor); signed = clients created that month (any
 //   status); CAC = spend ÷ signed, shown as an em-dash when 0 signed.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=20243a3';
-import { state } from './cfo-shell.js?v=20243a3';
-import { render } from './cfo-shell.js?v=20243a3';
-import { esc } from './utils.js?v=20243a3';
-import { lineChart, SERIES } from './charts.js?v=20243a3';
+import { sbPayroll as supabase } from './supabase.js?v=7581c06';
+import { state } from './cfo-shell.js?v=7581c06';
+import { render } from './cfo-shell.js?v=7581c06';
+import { esc } from './utils.js?v=7581c06';
+import { lineChart, SERIES } from './charts.js?v=7581c06';
 
 // Fulfillment-dashboard Supabase project (verify_jwt=false; same
 // session-token contract as weekly-update-send — see js/weekly-updates.js).
@@ -208,8 +208,8 @@ export function renderCacTab(){
       <thead><tr style="background:#f9fafb;border-bottom:2px solid var(--border)">
         <th style="${th2};text-align:left">Channel</th>
         <th style="${th2}">Spend</th>
-        <th style="${th2}">Qualified</th>
-        <th style="${th2}">$ / qualified</th>
+        <th style="${th2}">Qualified positives</th>
+        <th style="${th2}">$ / qualified positive</th>
         <th style="${th2}">Closed</th>
         <th style="${th2}">CAC</th>
       </tr></thead><tbody>`;
