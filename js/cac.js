@@ -12,11 +12,11 @@
 //   payouts (selling labor); signed = clients created that month (any
 //   status); CAC = spend ÷ signed, shown as an em-dash when 0 signed.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=ae42c07';
-import { state } from './cfo-shell.js?v=ae42c07';
-import { render } from './cfo-shell.js?v=ae42c07';
-import { esc } from './utils.js?v=ae42c07';
-import { lineChart, SERIES } from './charts.js?v=ae42c07';
+import { sbPayroll as supabase } from './supabase.js?v=2c82378';
+import { state } from './cfo-shell.js?v=2c82378';
+import { render } from './cfo-shell.js?v=2c82378';
+import { esc } from './utils.js?v=2c82378';
+import { lineChart, SERIES } from './charts.js?v=2c82378';
 
 // Fulfillment-dashboard Supabase project (verify_jwt=false; same
 // session-token contract as weekly-update-send — see js/weekly-updates.js).
@@ -189,43 +189,56 @@ export function renderCacTab(){
   }
   html += `</tbody></table></div>`;
 
-  // Cost per lead by acquisition channel (Aidan, 2026-10-29). A lead is a
-  // POSITIVE from the CRM's pipeline_leads ledger; channel software books
-  // whole (inboxes/domains/verify = email, Aimfox = LinkedIn, Blooio +
-  // ClearoutPhone = SMS) and shared list-building splits in equal thirds.
+  // Cost per QUALIFIED lead + CAC by acquisition channel (Aidan,
+  // 2026-10-30: positives alone mislead — "very few are qualified"). A
+  // qualified lead survived desk triage (not-real and desk-DQ excluded);
+  // CAC divides the channel's spend by clients CLOSED that month whose
+  // lead came from that channel.
   const cpl = state.cacReport.channel_cpl;
   if(cpl && cpl.length){
     const CH = [['email','Email'],['linkedin','LinkedIn'],['sms','SMS']];
     const th2 = 'padding:8px 10px;text-align:right;font-weight:600;white-space:nowrap';
     const td2 = 'padding:8px 10px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid #f3f4f6';
     html += `<div style="display:flex;align-items:baseline;gap:10px;margin:18px 0 8px">
-      <div style="font-size:13px;font-weight:700">Cost per lead by channel</div>
-      <div style="font-size:11px;color:var(--text-muted)">lead = positive (funnel ledger; dispositioned not-real cards excluded, desk-DQs count)</div>
+      <div style="font-size:13px;font-weight:700">Cost per qualified lead &amp; CAC, by channel</div>
+      <div style="font-size:11px;color:var(--text-muted)">qualified = positive that survived desk triage</div>
     </div>`;
     html += `<div style="overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px">
       <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="background:#f9fafb;border-bottom:2px solid var(--border)">
         <th style="${th2};text-align:left">Month</th>
-        ${CH.map(([,label])=>`<th style="${th2}">${label} leads</th><th style="${th2}">${label} $/lead</th>`).join('')}
+        <th style="${th2};text-align:left">Channel</th>
+        <th style="${th2}">Spend</th>
+        <th style="${th2}">Positives</th>
+        <th style="${th2}">Qualified</th>
+        <th style="${th2}">$ / qualified</th>
+        <th style="${th2}">Closed</th>
+        <th style="${th2}">CAC</th>
       </tr></thead><tbody>`;
     for(const m of cpl){
       const label = m.month.slice(0,4)+'-'+m.month.slice(5);
-      html += `<tr><td style="${td2};text-align:left;font-weight:600">${esc(label)}${m.partial?' <span title="partial month — channel stamping began Oct 8" style="color:var(--text-muted)">*</span>':''}</td>`;
-      for(const [key] of CH){
+      CH.forEach(([key, chLabel], i) => {
         const c = m.channels[key] || {};
-        const tip = `spend $${(c.spend||0).toFixed(2)} = $${(c.direct||0).toFixed(2)} direct + $${(c.shared_share||0).toFixed(2)} shared-list third`;
-        html += `<td style="${td2}">${c.leads||0}</td>
-          <td style="${td2};font-weight:600" title="${esc(tip)}">${c.cpl==null?'—':'$'+c.cpl.toFixed(2)}</td>`;
-      }
-      html += `</tr>`;
+        const tip = `$${(c.direct||0).toFixed(2)} direct + $${(c.shared_share||0).toFixed(2)} shared-list third`;
+        html += `<tr>
+          <td style="${td2};text-align:left;font-weight:600">${i===0?esc(label)+(m.partial?' <span title="partial month — channel stamping began Oct 8" style="color:var(--text-muted)">*</span>':''):''}</td>
+          <td style="${td2};text-align:left">${chLabel}</td>
+          <td style="${td2}" title="${esc(tip)}">$${(c.spend||0).toFixed(2)}</td>
+          <td style="${td2};color:var(--text-muted)">${c.leads||0}</td>
+          <td style="${td2}">${c.qualified||0}</td>
+          <td style="${td2};font-weight:600">${c.cpql==null?'—':'$'+c.cpql.toFixed(2)}</td>
+          <td style="${td2}">${c.won||0}</td>
+          <td style="${td2};font-weight:600">${c.cac==null?'—':'$'+c.cac.toFixed(2)}</td>
+        </tr>`;
+      });
     }
     html += `</tbody></table></div>`;
     html += `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.6">
-      Channel spend: inboxes, domains and email verification → Email; Aimfox → LinkedIn; Blooio iMessage +
-      ClearoutPhone → SMS. Shared list building (scrapes + enrichment yield email, LinkedIn profile and phone
-      in one pass) splits in equal thirds — hover a $/lead for the split. Selling labor and general
-      acquisition tools stay out of per-channel figures (they belong to no single channel; they remain in
-      loaded CAC above). * = partial month. Leads from cold calls or unknown sources are not shown here.
+      Channel spend: inboxes, domains, email verification and Blooio (texts email respondents) → Email;
+      Aimfox → LinkedIn; GHL sender share + ClearoutPhone → SMS. Shared list building splits in equal
+      thirds (hover Spend for the split). Positives exclude dispositioned not-real cards; qualified also
+      excludes desk-DQs. Closed counts clients won THAT month by lead channel, so CAC can lag the lead's
+      month. Selling labor and general tools stay out (they are in loaded CAC above). * = partial month.
     </div>`;
   }
 
