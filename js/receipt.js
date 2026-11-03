@@ -17,6 +17,14 @@ export function groupByKind(items) {
   }).filter((g) => g.lines.length);
 }
 
+// "49 × $27.00 + 10 × $50.00" for leads (rates differ by source); a plain count otherwise.
+export function countNote(g) {
+  if (g.kind !== 'lead') return g.lines.length > 1 ? `${g.lines.length}` : '';
+  const byRate = new Map();
+  for (const l of g.lines) byRate.set(Number(l.amount), (byRate.get(Number(l.amount)) ?? 0) + 1);
+  return [...byRate].map(([rate, n]) => `${n} × ${money(rate)}`).join(' + ');
+}
+
 export function receiptHtml({ payeeName, period, paidOn, method, reference, items, draft }) {
   const groups = groupByKind(items);
   const total = items.reduce((s, i) => s + Number(i.amount), 0);
@@ -42,7 +50,7 @@ ${draft ? '<div class="draft">Draft — not yet paid</div>' : ''}
   ${reference ? `<span class="m">Reference</span><span>${escHtml(reference)}</span>` : ''}
 </div>
 <table class="sum">
-  ${groups.map((g) => `<tr><td>${g.label}${g.kind === 'lead' ? ` <span class="m">(${g.lines.length} × ${money(g.lines[0].amount)})</span>` : g.lines.length > 1 ? ` <span class="m">(${g.lines.length})</span>` : ''}</td><td class="r">${money(g.total)}</td></tr>`).join('')}
+  ${groups.map((g) => `<tr><td>${g.label}${countNote(g) ? ` <span class="m">(${countNote(g)})</span>` : ''}</td><td class="r">${money(g.total)}</td></tr>`).join('')}
   <tr class="t"><td>Total</td><td class="r">${money(total)}</td></tr>
 </table>
 ${groups.map((g) => `<h2><span>${g.label}</span><span>${money(g.total)}</span></h2><table class="items">${g.lines.map(row).join('')}</table>`).join('')}
