@@ -1,13 +1,12 @@
 // The payroll screen: what is owed, what was paid, and the extras form.
 // Pay is never typed — the payout total is the sum of the lines it takes.
-import { esc, showToast } from './utils.js?v=ee72888';
+import { esc, showToast } from './utils.js?v=2f7c3f1';
 import {
-  syncFromCrm, loadUnpaid, loadPayouts, loadPayoutItems, recordPayout,
+  syncFromCrm, loadPayees, loadUnpaid, loadPayouts, loadPayoutItems, recordPayout,
   addManualItem, uploadReceipt, receiptUrl, voidItem,
-} from './ledger-data.js?v=ee72888';
-import { receiptHtml, groupByKind } from './receipt.js?v=ee72888';
+} from './ledger-data.js?v=2f7c3f1';
+import { receiptHtml, groupByKind } from './receipt.js?v=2f7c3f1';
 
-const PAYEE_NAME = 'Ioannis Serafeim';
 const MANUAL_KINDS = { reimbursement: 'Reimbursement', bonus: 'Bonus', adjustment: 'Adjustment' };
 
 const money = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -17,7 +16,7 @@ function lastDayOfPrevMonth() {
   const [y, m] = todayIso().split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, 0)).toISOString().slice(0, 10);
 }
-const view = { loading: true, error: '', unpaid: [], payouts: [], cutoff: lastDayOfPrevMonth(), open: new Set() };
+const view = { loading: true, error: '', payees: [], payee: '', unpaid: [], payouts: [], cutoff: lastDayOfPrevMonth(), open: new Set() };
 const periodLabel = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const due = () => view.unpaid.filter((i) => i.earned_on <= view.cutoff);
 const later = () => view.unpaid.filter((i) => i.earned_on > view.cutoff);
@@ -28,7 +27,8 @@ export async function refreshLedger({ sync = true } = {}) {
   view.loading = true; paint();
   try {
     if (sync) await syncFromCrm();
-    [view.unpaid, view.payouts] = await Promise.all([loadUnpaid(), loadPayouts()]);
+    if (!view.payees.length) { view.payees = await loadPayees(); view.payee = view.payees[0]?.name || ''; }
+    [view.unpaid, view.payouts] = await Promise.all([loadUnpaid(view.payee), loadPayouts(view.payee)]);
     view.error = '';
   } catch (e) {
     view.error = e.message;
@@ -36,9 +36,11 @@ export async function refreshLedger({ sync = true } = {}) {
   view.loading = false; paint();
 }
 
+const fullName = () => view.payees.find((p) => p.name === view.payee)?.fullName || view.payee;
+
 function openReceipt(opts) {
   const w = window.open('', '_blank');
-  w.document.write(receiptHtml({ payeeName: PAYEE_NAME, ...opts }));
+  w.document.write(receiptHtml({ payeeName: fullName(), ...opts }));
   w.document.close();
 }
 
@@ -66,7 +68,7 @@ function renderDue() {
   const total = sum(items);
   return `<section class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <h2 style="margin:0;font-size:16px">Next payout — ${esc(PAYEE_NAME)}</h2>
+      <h2 style="margin:0;font-size:16px">Next payout — ${esc(fullName())}</h2>
       <label style="font-size:12px;color:var(--text-muted)">Work up to
         <input type="date" value="${view.cutoff}" onchange="ledgerSetCutoff(this.value)" style="padding:4px 6px;border:1px solid var(--border);border-radius:6px"></label>
     </div>
@@ -116,7 +118,11 @@ export function renderLedger() {
   return `<div style="max-width:860px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <h1 style="margin:0;font-size:20px">Payroll</h1>
-      <button class="btn" onclick="ledgerRefresh()">Sync with CRM</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${view.payees.length > 1 ? `<select onchange="ledgerSetPayee(this.value)" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+          ${view.payees.map((p) => `<option value="${esc(p.name)}"${p.name === view.payee ? ' selected' : ''}>${esc(p.fullName)}</option>`).join('')}</select>` : ''}
+        <button class="btn" onclick="ledgerRefresh()">Sync with CRM</button>
+      </div>
     </div>
     ${view.error ? `<div class="card" style="color:#dc2626">${esc(view.error)}</div>` : ''}
     ${renderDue()}${renderManualForm()}${renderHistory()}
@@ -125,6 +131,7 @@ export function renderLedger() {
 
 // ─── Handlers ───
 window.ledgerRefresh = () => refreshLedger();
+window.ledgerSetPayee = (name) => { view.payee = name; view.open.clear(); refreshLedger({ sync: false }); };
 window.ledgerSetCutoff = (v) => { view.cutoff = v; paint(); };
 window.ledgerToggle = (key) => { view.open.has(key) ? view.open.delete(key) : view.open.add(key); paint(); };
 window.ledgerDraftReceipt = () => openReceipt({ period: periodLabel(view.cutoff), items: due(), draft: true });
@@ -158,7 +165,7 @@ window.ledgerRecord = async (expected) => {
   const val = (id) => document.getElementById(id).value.trim();
   if (!val('rp-ref')) { showToast('Add the transaction ID — it ties this record to the transfer'); return; }
   try {
-    await recordPayout({ cutoff: view.cutoff, expected, paidOn: val('rp-date'), method: val('rp-method'),
+    await recordPayout(view.payee, { cutoff: view.cutoff, expected, paidOn: val('rp-date'), method: val('rp-method'),
       reference: val('rp-ref'), period: val('rp-period'), notes: val('rp-notes') });
     showToast(`${money(expected)} recorded`, 'success');
     refreshLedger({ sync: false });
@@ -177,10 +184,10 @@ window.ledgerAddManual = async () => {
   if (!val('mi-desc') || !amount) { showToast('Description and amount are required'); return; }
   try {
     const file = document.getElementById('mi-file').files[0];
-    await addManualItem({
+    await addManualItem(view.payee, {
       kind: val('mi-kind'), description: val('mi-desc'), amount, earned_on: val('mi-date'),
       orig_amount: parseFloat(val('mi-orig')) || null, orig_currency: val('mi-cur').toUpperCase() || null,
-      fx_rate: parseFloat(val('mi-rate')) || null, receipt_path: file ? await uploadReceipt(file) : null,
+      fx_rate: parseFloat(val('mi-rate')) || null, receipt_path: file ? await uploadReceipt(view.payee, file) : null,
     });
     showToast('Line added', 'success');
     refreshLedger({ sync: false });

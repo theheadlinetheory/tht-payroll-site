@@ -1,8 +1,7 @@
 // Data access for the payroll ledger. Every amount comes from ledger_items;
 // the browser never computes pay and never reads the CRM.
-import { sbPayroll } from './supabase.js?v=ee72888';
+import { sbPayroll } from './supabase.js?v=2f7c3f1';
 
-export const PAYEE = 'Ioannis';
 const ITEM_COLS = 'id,position,kind,source_id,description,amount,orig_amount,orig_currency,fx_rate,receipt_path,earned_on,payout_id,reverses_item_id,created_by,created_at';
 
 function must({ data, error }) {
@@ -18,13 +17,20 @@ export async function syncFromCrm() {
   return data;
 }
 
-export async function loadUnpaid() {
-  return must(await sbPayroll.from('ledger_items').select(ITEM_COLS)
-    .eq('payee', PAYEE).is('payout_id', null).is('voided_at', null).order('earned_on'));
+// Everyone paid per lead/demo, one entry per name (Ioannis has two position rows).
+export async function loadPayees() {
+  const rows = must(await sbPayroll.from('employees').select('name,full_name')
+    .eq('status', 'active').eq('pay_type', 'commission').order('created_at'));
+  return [...new Map(rows.map((r) => [r.name, { name: r.name, fullName: r.full_name || r.name }])).values()];
 }
 
-export async function loadPayouts() {
-  return must(await sbPayroll.from('payouts').select('*').eq('payee', PAYEE).order('paid_on', { ascending: false }));
+export async function loadUnpaid(payee) {
+  return must(await sbPayroll.from('ledger_items').select(ITEM_COLS)
+    .eq('payee', payee).is('payout_id', null).is('voided_at', null).order('earned_on'));
+}
+
+export async function loadPayouts(payee) {
+  return must(await sbPayroll.from('payouts').select('*').eq('payee', payee).order('paid_on', { ascending: false }));
 }
 
 export async function loadPayoutItems(payoutId) {
@@ -32,15 +38,15 @@ export async function loadPayoutItems(payoutId) {
 }
 
 // Atomic on the server: refuses if the unpaid total moved since the screen loaded.
-export async function recordPayout({ cutoff, expected, paidOn, method, reference, period, notes }) {
+export async function recordPayout(payee, { cutoff, expected, paidOn, method, reference, period, notes }) {
   return must(await sbPayroll.rpc('record_payout', {
-    p_payee: PAYEE, p_cutoff: cutoff, p_expected: expected, p_paid_on: paidOn,
+    p_payee: payee, p_cutoff: cutoff, p_expected: expected, p_paid_on: paidOn,
     p_method: method, p_reference: reference, p_period: period, p_notes: notes || null,
   }));
 }
 
-export async function uploadReceipt(file) {
-  const path = `${PAYEE}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
+export async function uploadReceipt(payee, file) {
+  const path = `${payee}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
   must(await sbPayroll.storage.from('receipts').upload(path, file));
   return path;
 }
@@ -49,8 +55,8 @@ export async function receiptUrl(path) {
   return must(await sbPayroll.storage.from('receipts').createSignedUrl(path, 300)).signedUrl;
 }
 
-export async function addManualItem(item) {
-  return must(await sbPayroll.from('ledger_items').insert({ payee: PAYEE, ...item }).select().single());
+export async function addManualItem(payee, item) {
+  return must(await sbPayroll.from('ledger_items').insert({ payee, ...item }).select().single());
 }
 
 // Only unpaid lines can be voided; the database refuses anything else.
