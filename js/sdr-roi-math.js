@@ -49,8 +49,11 @@ export function leadCosts(items) {
   return out;
 }
 
-/** A payee's base pay falling in [from, to]: each monthly base line, pro-rated by the days of its month in range. */
-export function baseCost(items, payee, from, to) {
+/** A payee's base pay falling in [from, min(to, today)]: each monthly base line, pro-rated by the days of its
+ *  month in range. Days after `today` haven't been worked yet, so they carry no base (the ledger writes the
+ *  current month's base line on day 1). */
+export function baseCost(items, payee, from, to, today = '9999-12-31') {
+  if (today < to) to = today;
   let total = 0;
   for (const it of items) {
     if (it.kind !== 'base' || it.voided_at || it.payee !== payee) continue;

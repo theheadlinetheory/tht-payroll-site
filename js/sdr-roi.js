@@ -5,10 +5,10 @@
 // Pay: this site's payroll ledger. Math: sdr-roi-math.js. $/hour waits on hours from the
 // SDR's EOD report (#standard-work-checklist) — shown as coming soon.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=efb3bfb';
-import { state, render } from './cfo-shell.js?v=efb3bfb';
-import { esc } from './utils.js?v=efb3bfb';
-import { periodRange, shiftPeriod, leadCosts, baseCost, sdrRoi, BASE_PAYEES } from './sdr-roi-math.js?v=efb3bfb';
+import { sbPayroll as supabase } from './supabase.js?v=cffb16a';
+import { state, render } from './cfo-shell.js?v=cffb16a';
+import { esc } from './utils.js?v=cffb16a';
+import { periodRange, shiftPeriod, leadCosts, baseCost, sdrRoi, BASE_PAYEES } from './sdr-roi-math.js?v=cffb16a';
 
 const FN_URL = 'https://zrmobsgcfcloufajemxj.supabase.co/functions/v1/sdr-roi-report';
 const LEDGER_COLS = 'id,payee,kind,source_id,amount,earned_on,voided_at,reverses_item_id';
@@ -98,7 +98,7 @@ export function renderSdrRoiTab(){
   if(!state.sdrRoi) return html + `<div style="color:var(--text-muted);font-size:13px">Loading…</div></div>`;
   const { report, ledger, costByLead } = state.sdrRoi;
   const rows = sdrRoi({ days: report.days, leads: report.leads, costByLead, from: range.from, to: range.to,
-    baseOf: s => BASE_PAYEES.includes(s) ? baseCost(ledger, s, range.from, range.to) : 0 });
+    baseOf: s => BASE_PAYEES.includes(s) ? baseCost(ledger, s, range.from, range.to, todayIso()) : 0 });
   html += rows.length ? table(rows) : `<div style="color:var(--text-muted);font-size:13px">No SDR dials or bookings in this period.</div>`;
   const unpaid = rows.reduce((n, r) => n + r.unpaidLeads, 0);
   html += `<div style="font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.6">

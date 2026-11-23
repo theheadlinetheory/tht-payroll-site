@@ -8,10 +8,10 @@
 // up per batch industry with an expandable vendor split per group.
 // Data: margin-report { client_id } → { costs, revenue, industry_of }.
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=efb3bfb';
-import { state } from './cfo-shell.js?v=efb3bfb';
-import { render } from './cfo-shell.js?v=efb3bfb';
-import { esc } from './utils.js?v=efb3bfb';
+import { sbPayroll as supabase } from './supabase.js?v=cffb16a';
+import { state } from './cfo-shell.js?v=cffb16a';
+import { render } from './cfo-shell.js?v=cffb16a';
+import { esc } from './utils.js?v=cffb16a';
 
 const MARGIN_FN_URL = 'https://zrmobsgcfcloufajemxj.supabase.co/functions/v1/margin-report';
 
