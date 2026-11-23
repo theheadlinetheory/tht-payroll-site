@@ -1,12 +1,12 @@
-import { initAuth, currentEmail, signOut } from './auth.js?v=2f7c3f1';
-import { refreshLedger } from './ledger-view.js?v=2f7c3f1';
-import { renderCfoTab } from './cfo.js?v=2f7c3f1';
-import { state, setPainter } from './cfo-shell.js?v=2f7c3f1';
-import { esc } from './utils.js?v=2f7c3f1';
+import { initAuth, currentEmail, signOut } from './auth.js?v=efb3bfb';
+import { refreshLedger } from './ledger-view.js?v=efb3bfb';
+import { renderCfoTab } from './cfo.js?v=efb3bfb';
+import { state, setPainter } from './cfo-shell.js?v=efb3bfb';
+import { esc } from './utils.js?v=efb3bfb';
 
 // Pages. `#payroll` (default) is the ledger; `#cfo` is the CFO Hub, with the
 // CRM's deep-links kept: #cfo/cac, #cfo/margins, #cfo/overhead.
-const CFO_VIEWS = ['overview', 'cac', 'margins', 'overhead'];
+const CFO_VIEWS = ['overview', 'cac', 'margins', 'overhead', 'sdr'];
 
 function route() {
   const [page, sub] = location.hash.replace('#', '').split('/');

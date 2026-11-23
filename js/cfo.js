@@ -7,14 +7,15 @@
 //   one tab instead of three (Aidan, 2026-09-29: essential numbers only,
 //   limited noise; add more later).
 // ═══════════════════════════════════════════════════════════
-import { sbPayroll as supabase } from './supabase.js?v=2f7c3f1';
-import { state } from './cfo-shell.js?v=2f7c3f1';
-import { render } from './cfo-shell.js?v=2f7c3f1';
-import { esc } from './utils.js?v=2f7c3f1';
-import { renderCacTab } from './cac.js?v=2f7c3f1';
-import { renderMarginsTab } from './margins.js?v=2f7c3f1';
-import { renderOverheadTab } from './overhead.js?v=2f7c3f1';
-import { stackedColumns, SERIES, INK } from './charts.js?v=2f7c3f1';
+import { sbPayroll as supabase } from './supabase.js?v=efb3bfb';
+import { state } from './cfo-shell.js?v=efb3bfb';
+import { render } from './cfo-shell.js?v=efb3bfb';
+import { esc } from './utils.js?v=efb3bfb';
+import { renderCacTab } from './cac.js?v=efb3bfb';
+import { renderMarginsTab } from './margins.js?v=efb3bfb';
+import { renderOverheadTab } from './overhead.js?v=efb3bfb';
+import { renderSdrRoiTab } from './sdr-roi.js?v=efb3bfb';
+import { stackedColumns, SERIES, INK } from './charts.js?v=efb3bfb';
 
 const FN_URL = 'https://zrmobsgcfcloufajemxj.supabase.co/functions/v1/cfo-report';
 
@@ -141,13 +142,13 @@ export function renderCfoTab(){
   let html = `<div style="padding:8px 20px 0;max-width:960px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <h2 style="font-size:16px;font-weight:700;margin:0 6px 0 0">CFO Hub</h2>
-      ${pill('overview','Overview')}${pill('cac','CAC')}${pill('margins','Client Margins')}${pill('overhead','Overhead')}
+      ${pill('overview','Overview')}${pill('cac','CAC')}${pill('margins','Client Margins')}${pill('overhead','Overhead')}${pill('sdr','SDR ROI')}
       <span style="flex:1"></span>
       ${view==='overview'&&gen?`<span style="font-size:11px;color:var(--text-muted)">Updated ${esc(gen.toLocaleString())}</span>`:''}
       ${view==='overview'?`<button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="cfoRefresh()" ${state.cfoLoading?'disabled':''}>${state.cfoLoading?'Refreshing…':'↻ Refresh'}</button>`:''}
     </div>`;
   if(view === 'overview') html += overviewHtml() + `</div>`;
-  else html += `</div>` + (view === 'cac' ? renderCacTab() : view === 'margins' ? renderMarginsTab() : renderOverheadTab());
+  else html += `</div>` + (view === 'cac' ? renderCacTab() : view === 'margins' ? renderMarginsTab() : view === 'sdr' ? renderSdrRoiTab() : renderOverheadTab());
   return html;
 }
 
